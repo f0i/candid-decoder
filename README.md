@@ -11,6 +11,10 @@ Only use this if you really don't have access to a type definition at the time o
 
 If you have access to the expected type or need to encode values, use [@dfinity/candid](https://github.com/dfinity/agent-js/tree/main/packages/candid) or another [Candid implemention](https://github.com/dfinity/awesome-internet-computer?tab=readme-ov-file#candid-implementations).
 
+## Demo
+
+[Try out the decoder on GitHub Pages!](https://f0i.github.io/candid-decoder/candid.html)
+
 ## Features
 
 - Decode Candid values without predefined schemas  
@@ -58,7 +62,7 @@ To show the user likely names of the original candid, a lookup table is generate
 The resulting names are not guaranteed to map to unique hashes, so they might not match the original candid field names!
 
 ```bash
-find .. -name "*.did" -exec cat {} \; | grep -E '^\s*[a-zA-Z_][a-zA-Z0-9_]*\s*:' | sed -E 's/^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:.*$/\1/' | sort | uniq > ./src/frontend/identify/candidFieldNames.txt
+find .. -name "*.did" -exec cat {} \; | grep -E '^\s*[a-zA-Z_][a-zA-Z0-9_]*\s*:' | sed -E 's/^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:.*$/\1/' | sort | uniq > ./src/candidFieldNames.txt
 
 node ./generateFieldNames.js
 ```
