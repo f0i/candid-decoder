@@ -11,6 +11,7 @@
     "build:cjs": "tsc --project tsconfig.cjs.json",
     "build": "npm run clean && npm run build:esm && npm run build:cjs",
     "clean": "rm -rf dist",
+    "example": "node build.js",
     "test": "jest"
   },
   "exports": {
@@ -30,7 +31,6 @@
   ],
   "author": "Martin Sigloch <f0i.npm@projects.f0i.de>",
   "license": "MIT",
-  "type": "module",
   "dependencies": {
     "@dfinity/principal": "^2.4.1"
   },
