@@ -2,13 +2,26 @@
   "name": "candid-decoder",
   "version": "1.0.0",
   "description": "Typeless candid decode",
-  "main": "./dist/candidDecoder.js",
-  "types": "./dist/candidDecoder.d.ts",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
   "scripts": {
-    "build": "npm run build:js && npm run build:types",
-    "build:js": "node build.js",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:esm": "tsc --project tsconfig.esm.json",
+    "build:cjs": "tsc --project tsconfig.cjs.json",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs",
+    "clean": "rm -rf dist",
     "test": "jest"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./candidFieldNames": {
+      "import": "./dist/esm/candidFieldNames.js",
+      "require": "./dist/cjs/candidFieldNames.js"
+    }
   },
   "keywords": [
     "candid",

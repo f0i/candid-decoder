@@ -41,11 +41,13 @@ const candidBytes = new Uint8Array(
 const result1 = decodeCandid(candidBytes);
 
 console.log("Decoded without field names:", result1);
+// Decoded without field names: { ok: [ { _4895187: true, _5097222: 42n } ] }
 
 // Decode with field names (optional for nicer output)
 const result2 = decodeCandid(candidBytes, fieldNames);
 
 console.log("Decoded with field names:", result2);
+// Decoded with field names: { ok: [ { bar: true, foo: 42n } ] }
 ```
 
 ## Candid field name lookup table
