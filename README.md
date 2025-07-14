@@ -27,7 +27,7 @@ If you have access to the expected type or need to encode values, use [@dfinity/
 ## Installation
 
 ```bash
-npm install candid-decoder @dfinity/principal
+npm install candid-decoder
 ```
 
 ## Usage
@@ -61,8 +61,13 @@ To show the user likely names of the original candid, a lookup table is generate
 
 The resulting names are not guaranteed to map to unique hashes, so they might not match the original candid field names!
 
+The table provided in `"candid-decoder/candidFieldNames"` was generated from several example repos using the following commands:
+
 ```bash
 find .. -name "*.did" -exec cat {} \; | grep -E '^\s*[a-zA-Z_][a-zA-Z0-9_]*\s*:' | sed -E 's/^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:.*$/\1/' | sort | uniq > ./src/candidFieldNames.txt
 
 node ./generateFieldNames.js
 ```
+
+Contributions to expand this table are very welcome!
+
