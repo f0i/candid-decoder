@@ -1,6 +1,6 @@
 {
   "name": "candid-decoder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Typeless candid decode",
   "type": "module",
   "main": "./dist/cjs/index.js",
