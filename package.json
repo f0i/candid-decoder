@@ -1,0 +1,27 @@
+{
+  "name": "candid-decoder",
+  "version": "1.0.0",
+  "description": "Typeless candid decode",
+  "main": "./dist/candidDecoder.js",
+  "types": "./dist/candidDecoder.d.ts",
+  "scripts": {
+    "build": "npm run build:js && npm run build:types",
+    "build:js": "node build.js",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "test": "jest"
+  },
+  "keywords": [
+    "candid",
+    "decoder",
+    "ICP"
+  ],
+  "author": "Martin Sigloch <f0i.npm@projects.f0i.de>",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@dfinity/principal": "^2.4.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.6"
+  }
+}
