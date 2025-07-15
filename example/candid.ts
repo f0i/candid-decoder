@@ -28,6 +28,46 @@ document.addEventListener("DOMContentLoaded", () => {
   ) as HTMLDivElement;
 
   /**
+   * Copies the content of a textarea to the clipboard and provides visual feedback.
+   * @param textarea The textarea element to copy from.
+   */
+  function copyToClipboard(textarea: HTMLTextAreaElement) {
+    if (!textarea.value) return; // Don't copy if there's nothing to copy
+
+    const feedbackElement = document.getElementById(`${textarea.id}-feedback`);
+
+    navigator.clipboard
+      .writeText(textarea.value)
+      .then(() => {
+        // Provide visual feedback
+        textarea.classList.add("copied");
+        if (feedbackElement) {
+          feedbackElement.textContent = "Copied!";
+        }
+
+        // Reset the visual feedback after a short delay
+        setTimeout(() => {
+          textarea.classList.remove("copied");
+          if (feedbackElement) {
+            feedbackElement.textContent = "";
+          }
+        }, 1500); // 1.5 seconds
+      })
+      .catch((err) => {
+        console.error("Failed to copy text: ", err);
+        // Optionally, provide error feedback to the user
+        if (feedbackElement) {
+          feedbackElement.textContent = "Failed to copy!";
+        }
+        setTimeout(() => {
+          if (feedbackElement) {
+            feedbackElement.textContent = "";
+          }
+        }, 2000);
+      });
+  }
+
+  /**
    * Converts a string containing byte escape sequences (e.g., '\02', '\6b')
    * into a pure hexadecimal string.
    * @param inputString The string with escape sequences.
@@ -402,6 +442,15 @@ document.addEventListener("DOMContentLoaded", () => {
   unifiedInput.addEventListener("input", () => {
     processInput(unifiedInput.value);
   });
+
+  // --- Event Listeners for Copying ---
+  hexOutput.addEventListener("click", () => copyToClipboard(hexOutput));
+  escapedStringOutput.addEventListener("click", () =>
+    copyToClipboard(escapedStringOutput),
+  );
+  base64Output.addEventListener("click", () => copyToClipboard(base64Output));
+  arrayOutput.addEventListener("click", () => copyToClipboard(arrayOutput));
+  hexArrayOutput.addEventListener("click", () => copyToClipboard(hexArrayOutput));
 
   // Initial processing if there's any pre-filled value
   if (unifiedInput.value) {
