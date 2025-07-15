@@ -17,9 +17,55 @@ document.addEventListener("DOMContentLoaded", () => {
   const base64Output = document.getElementById(
     "base64Output",
   ) as HTMLTextAreaElement;
+  const arrayOutput = document.getElementById(
+    "arrayOutput",
+  ) as HTMLTextAreaElement;
+  const hexArrayOutput = document.getElementById(
+    "hexArrayOutput",
+  ) as HTMLTextAreaElement;
   const resultContainer = document.getElementById(
     "resultContainer",
   ) as HTMLDivElement;
+
+  /**
+   * Copies the content of a textarea to the clipboard and provides visual feedback.
+   * @param textarea The textarea element to copy from.
+   */
+  function copyToClipboard(textarea: HTMLTextAreaElement) {
+    if (!textarea.value) return; // Don't copy if there's nothing to copy
+
+    const feedbackElement = document.getElementById(`${textarea.id}-feedback`);
+
+    navigator.clipboard
+      .writeText(textarea.value)
+      .then(() => {
+        // Provide visual feedback
+        textarea.classList.add("copied");
+        if (feedbackElement) {
+          feedbackElement.textContent = "Copied!";
+        }
+
+        // Reset the visual feedback after a short delay
+        setTimeout(() => {
+          textarea.classList.remove("copied");
+          if (feedbackElement) {
+            feedbackElement.textContent = "";
+          }
+        }, 1500); // 1.5 seconds
+      })
+      .catch((err) => {
+        console.error("Failed to copy text: ", err);
+        // Optionally, provide error feedback to the user
+        if (feedbackElement) {
+          feedbackElement.textContent = "Failed to copy!";
+        }
+        setTimeout(() => {
+          if (feedbackElement) {
+            feedbackElement.textContent = "";
+          }
+        }, 2000);
+      });
+  }
 
   /**
    * Converts a string containing byte escape sequences (e.g., '\02', '\6b')
@@ -96,6 +142,34 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /**
+   * Converts a hex string to an array representation.
+   * @param hexString The hex string to convert.
+   * @returns The array representation string.
+   */
+  function convertHexToArray(hexString: string): string {
+    if (hexString.length === 0) return "[]";
+    const bytes: number[] = [];
+    for (let i = 0; i < hexString.length; i += 2) {
+      bytes.push(parseInt(hexString.substring(i, i + 2), 16));
+    }
+    return `[${bytes.join(", ")}]`;
+  }
+
+  /**
+   * Converts a hex string to a hex array representation.
+   * @param hexString The hex string to convert.
+   * @returns The hex array representation string.
+   */
+  function convertHexToHexArray(hexString: string): string {
+    if (hexString.length === 0) return "[]";
+    const hexBytes: string[] = [];
+    for (let i = 0; i < hexString.length; i += 2) {
+      hexBytes.push("0x" + hexString.substring(i, i + 2).toUpperCase());
+    }
+    return `[${hexBytes.join(", ")}]`;
+  }
+
+  /**
    * Converts a Base64 string to a hex string.
    * @param base64String The Base64 string to convert.
    * @returns The hex string.
@@ -125,7 +199,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const trimmedInput = input.trim();
     if (trimmedInput.length === 0) return null;
 
-    // 1. Check for Hex String (even length, only hex characters)
+    // 1. Check for Array representation (e.g., [1, 2, 0x34])
+    if (trimmedInput.startsWith("[") && trimmedInput.endsWith("]")) {
+      try {
+        const arrayContent = trimmedInput.substring(1, trimmedInput.length - 1);
+        const byteStrings = arrayContent.split(",").map((s) => s.trim());
+        let hexResult = "";
+        for (const byteStr of byteStrings) {
+          if (byteStr.length === 0) continue; // Skip empty strings from extra commas
+
+          let byteValue: number;
+          if (byteStr.startsWith("0x") || byteStr.startsWith("0X")) {
+            byteValue = parseInt(byteStr.substring(2), 16);
+          } else {
+            byteValue = parseInt(byteStr, 10);
+          }
+
+          if (isNaN(byteValue) || byteValue < 0 || byteValue > 255) {
+            throw new Error(`Invalid byte value in array: ${byteStr}`);
+          }
+          hexResult += byteValue.toString(16).padStart(2, "0").toUpperCase();
+        }
+        return hexResult;
+      } catch (e) {
+        console.error("Error parsing array input:", e);
+        return null; // Invalid array format
+      }
+    }
+
+    // 2. Check for Hex String (even length, only hex characters)
     if (/^[0-9a-fA-F]+$/.test(trimmedInput) && trimmedInput.length % 2 === 0) {
       // Potentially a hex string. Check if it decodes cleanly from base64 first as a heuristic
       // This is to differentiate hex from base64 that might *look* like hex
@@ -144,12 +246,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return trimmedInput.toUpperCase(); // Assume it's hex if it passes the regex
     }
 
-    // 2. Check for Escaped String (starts with "DIDL" or contains backslashes)
+    // 3. Check for Escaped String (starts with "DIDL" or contains backslashes)
     if (trimmedInput.startsWith("DIDL") || trimmedInput.includes("\\")) {
       return convertEscapedStringToHex(trimmedInput);
     }
 
-    // 3. Check for Base64 String (try decoding)
+    // 4. Check for Base64 String (try decoding)
     // Base64 strings usually have a length divisible by 4, and use A-Z, a-z, 0-9, +, /, =
     if (
       /^[A-Za-z0-9+/=]+$/.test(trimmedInput) &&
@@ -214,6 +316,8 @@ document.addEventListener("DOMContentLoaded", () => {
       hexOutput.value = hexToDecode;
       escapedStringOutput.value = convertHexToEscapedString(hexToDecode);
       base64Output.value = convertHexToBase64(hexToDecode);
+      arrayOutput.value = convertHexToArray(hexToDecode);
+      hexArrayOutput.value = convertHexToHexArray(hexToDecode);
     } else {
       // This case should ideally be caught by conversionError, but as a fallback
       displayError(
@@ -338,6 +442,15 @@ document.addEventListener("DOMContentLoaded", () => {
   unifiedInput.addEventListener("input", () => {
     processInput(unifiedInput.value);
   });
+
+  // --- Event Listeners for Copying ---
+  hexOutput.addEventListener("click", () => copyToClipboard(hexOutput));
+  escapedStringOutput.addEventListener("click", () =>
+    copyToClipboard(escapedStringOutput),
+  );
+  base64Output.addEventListener("click", () => copyToClipboard(base64Output));
+  arrayOutput.addEventListener("click", () => copyToClipboard(arrayOutput));
+  hexArrayOutput.addEventListener("click", () => copyToClipboard(hexArrayOutput));
 
   // Initial processing if there's any pre-filled value
   if (unifiedInput.value) {
